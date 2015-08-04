@@ -41,6 +41,11 @@ class SocketServer(Thread):
                 conn.close()
 
         finally:
+
+            # TODO read about setsockopt and options
+            # TODO find a way to programmatically stop reading and close the socket
+
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             # Close the socket
             self.s.close()
 
