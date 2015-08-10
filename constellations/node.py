@@ -11,28 +11,15 @@ from .basics.socketClientServer import SocketClient
 
 class Data:
 
-    def __init__(self, data=None):
+    def __init__(self):
         self.me = {}
         self.peers = {}
-        self.message_queue = Queue()
-
-    def add_me(self, data):
-        # TODO Investigate more elegant ways to copy the data
-        for key in data:
-            self.me[key] = data[key]
-
-    def add_peer(self, data):
-        # TODO Pattern-match existing peers before creating a new one
-        new_name = "temp_" + randint(1000, 9999)
-        self.peers[new_name] = {}
-        for key in data:
-            self.peers[new_name][key] = data[key]
 
 
 class Node(Thread):
     """ A Node combines an input server with a queue and a list of handlers """
 
-    def __init__(self, port=50000):
+    def __init__(self, host='', port=50000):
         super(Node, self).__init__()
         self.daemon = True  # Makes the thread exit when the main program exits
 
@@ -40,34 +27,36 @@ class Node(Thread):
         # TODO add the handler and acts lists implementations (think about the semantics and abstractions)
         # TODO make Node be a thread or use its own thread
 
-        # A queue to place incoming messages until they are handled
-        self.queue = Queue()
         self.data = Data()
+        self.data.me['address'] = (host, port)
+
+        # A queue to place incoming messages until they are handled
+        self.message_queue = Queue()
 
         # Add the put method of the message_queue as callback to the server
-        self.server = SocketServer(port, self.data.message_queue.put)
+        self.server = SocketServer(self.message_queue.put, host, port)
 
         # handlers are functions that accept the messages from the queue as input
         self.handlers = []
+        self.acts = []
 
         self.running = True
         self.server.start()
 
-    """
-    def add_to_queue(self, message):
-        print("Node received: " + message)
-        self.messageQueue.put(message)
-    """
-
     def add_handler(self, func):
+        # TODO check if func supports the message argument (is this possible?)
         self.handlers.append(func)
 
-    def run(self):
+    def add_act(self, func):
+        # TODO check if func supports the data argument (is this possible?)
+        self.acts.append(func)
 
+    def run(self):
+        """Gets one message at a time from message_queue and passes it to the registered handlers"""
         while self.running:
             try:
                 # Waits for 3 seconds, otherwise throws `Queue.Empty`
-                next_item = self.data.message_queue.get(True, 3)
+                next_item = self.message_queue.get(True, 3)
             except queue.Empty:
                 next_item = None
 
@@ -75,6 +64,11 @@ class Node(Thread):
             if next_item is not None:
                 for h in self.handlers:
                     h(next_item)
+
+            # Run the acts one by one
+            # TODO run in separate threads if required
+            for a in self.acts:
+                a(self.data)
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ from threading import Thread
 class SocketServer(Thread):
     """A threaded server that forwards the incoming messages to a supplied callback"""
 
-    def __init__(self, port, callback):
+    def __init__(self, callback, host='', port=50000):
         super(SocketServer, self).__init__()
         self.daemon = True  # Makes the thread exit when the main program exits
 
