@@ -1,2 +1,2 @@
 # constellations
-A study in networks, swarms, agents and other things using Python.
+A study in networks, agents and other things using Python.
