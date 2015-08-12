@@ -2,6 +2,7 @@
 import sys
 import time
 
+from constellations.peer_node import PeerNode
 from constellations.node import Node
 from constellations.basics.socketClientServer import SocketServer
 from constellations.basics.socketClientServer import SocketClient
@@ -39,16 +40,21 @@ SocketClient.send("localhost", 50000, "second message")
 def myhandler(message):
     print("My handler1 received: " + message)
 
-n1 = Node(50000)
-n2 = Node(50001)
+n1 = Node(50002)
+n2 = Node(50003)
 n1.add_handler(myhandler)
 n2.add_handler(myhandler)
 n1.start()
 n2.start()
 
-SocketClient.send("localhost", 50000, "lodpsdppsdpsdf")
-time.sleep(2)
-SocketClient.send("localhost", 50001, "second message")
+pn1 = PeerNode(n1)
+pn2 = PeerNode(n2)
+
+
+
+#SocketClient.send("localhost", 50000, "lodpsdppsdpsdf")
+#time.sleep(2)
+#SocketClient.send("localhost", 50001, "second message")
 
 time.sleep(1)
 input("Press Enter to continue...")
