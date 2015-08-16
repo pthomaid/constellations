@@ -5,8 +5,8 @@ from queue import Queue
 from threading import Thread
 from random import randint
 
-from .basics.socketClientServer import SocketServer
-from .basics.socketClientServer import SocketClient
+from .socket_client_server import SocketServer
+from .socket_client_server import SocketClient
 
 
 class Data:
@@ -16,31 +16,33 @@ class Data:
         self.peers = {}
 
 
-class Node(Thread):
+class Node:
     """ A Node combines an input server with a queue and a list of handlers """
 
     def __init__(self, host='', port=50000):
-        super(Node, self).__init__()
-        self.daemon = True  # Makes the thread exit when the main program exits
-
         # TODO pick another port if the first one is already bound
         # TODO add the handler and acts lists implementations (think about the semantics and abstractions)
         # TODO make Node be a thread or use its own thread
 
         self.data = Data()
-        self.data.me['address'] = (host, port)
+        self.data.me['address'] = [host, port]
 
-        # A queue to place incoming messages until they are handled
+        # A queue to place incoming messages, decouples the server from the handling
         self.message_queue = Queue()
 
         # Add the put method of the message_queue as callback to the server
         self.server = SocketServer(self.message_queue.put, host, port)
 
-        # handlers are functions that accept the messages from the queue as input
+        # Handlers handle the incoming messages
         self.handlers = []
+
+        # Acts are functions run in separate threads, associated with this node and its data
         self.acts = []
 
         self.running = True
+
+        t = Thread(target=self.queue_consumer, daemon=True)
+        t.start()
         self.server.start()
 
     def add_handler(self, func):
@@ -49,9 +51,15 @@ class Node(Thread):
 
     def add_act(self, func):
         # TODO check if func supports the data argument (is this possible?)
-        self.acts.append(func)
+        t = Thread(target=func, args=(self, self.data), daemon=True)
+        t.start()
+        self.acts.append(t)
 
-    def run(self):
+    def stop(self):
+        # TODO safely stop server and all threads
+        self.running = False
+
+    def queue_consumer(self):
         """Gets one message at a time from message_queue and passes it to the registered handlers"""
         while self.running:
             try:
@@ -65,11 +73,6 @@ class Node(Thread):
                 for h in self.handlers:
                     h(next_item)
 
-            # Run the acts one by one
-            # TODO run in separate threads if required
-            for a in self.acts:
-                a(self.data)
-
 
 if __name__ == "__main__":
 
@@ -79,16 +82,17 @@ if __name__ == "__main__":
     def myhandler2(message):
         print("My handler2 received: " + message)
 
-    n = Node()
+    def greetings_sender(context, data):
+        i = 0
+        while True:
+            SocketClient.send("localhost", data.me['address'][1], "lodpsdppsdpsdf" + str(i))
+            i += 1
+            time.sleep(2)
+
+    n = Node(port=5003)
     n.add_handler(myhandler1)
     n.add_handler(myhandler2)
-    n.start()
-
-    SocketClient.send("localhost", 50000, "lodpsdppsdpsdf")
-
-    time.sleep(2)
-
-    SocketClient.send("localhost", 50000, "second message")
+    n.add_act(greetings_sender)
 
     import sys
     time.sleep(1)

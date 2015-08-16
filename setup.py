@@ -11,7 +11,7 @@ setup(
     author='Panagiotis Thomaidis',
     author_email='pthomaid@gmail.com',
     url='https://github.com/pthomaid/constellations',
-    packages=['constellations', 'constellations.basics'],
+    packages=['constellations'],
     download_url = 'https://github.com/pthomaid/constellations',
     keywords = ['distributed', 'sockets'],
     description='Distributed multi-agent framework',

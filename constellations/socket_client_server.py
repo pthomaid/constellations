@@ -55,19 +55,22 @@ class SocketClient:
 
     @staticmethod
     def send(host, port, message):
+        response = ""
+        try:
+            # Create the socket object
+            s = socket.socket()
 
-        # Create the socket object
-        s = socket.socket()
+            s.connect((host, port))
 
-        s.connect((host, port))
+            # Convert the message to bytes and send
+            s.sendall(bytes(message, 'UTF-8'))
 
-        # Convert the message to bytes and send
-        s.sendall(bytes(message, 'UTF-8'))
-
-        # Receive the response
-        response = s.recv(1024)
-
-        s.close()
+            # Receive the response
+            response = s.recv(1024)
+        except TypeError:
+            print("TypeError while sending: " + message)
+        finally:
+            s.close()
 
         return response.decode('UTF-8')
 

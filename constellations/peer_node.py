@@ -6,53 +6,50 @@ from queue import Queue
 from threading import Thread
 from random import randint
 
-from .basics.socketClientServer import SocketServer
-from .basics.socketClientServer import SocketClient
-
+from .socket_client_server import SocketServer
+from .socket_client_server import SocketClient
 from .node import Node
+from . import message
 
 
-class Message:
+class PeerNode(Node):
 
-    def __init__(self):
-        self.from_address = ('', -1)
-        self.to_address = ('', -1)
-        self.message = {}
+    def __init__(self, host='', port=50000):
+        super().__init__(host, port)
 
-    def parse(self, s):
-        # TODO Handle cases when the parsing goes wrong (exception, defaults values)
-        s_dict = json.loads(s)
-        self.from_address = s_dict['from']
-        self.to_address = s_dict['to']
-        self.message = s_dict['message']
-
-    def jsonify(self):
-        s = json.dumps(self)
-        return s
-
-
-class PeerNode:
-
-    def __init__(self, node):
-        self.node = node
-        self.data = node.data
-
-        self.node.add_handler(self.parse_address)
-        self.node.add_act(self.share_my_address)
+        self.add_handler(self.parse_address)
+        self.add_act(self.share_my_address)
 
     def parse_address(self, s):
-        m = Message()
-        m.parse(s)
-        # TODO check if adresses match already
-        self.data.me['address'] = message.to_address
-        self.node.data.peers[""+randint(1000, 9999)]['address'] = message.from_address
+        print("Peer node received " + s)
+        m = message.parse(s)
+        # TODO check if an addresses is already known
+        self.data.me['address'] = m.to_address
+        new_id = str(randint(1000, 9999))
+        self.data.peers[new_id] = {}
+        self.data.peers[new_id]['address'] = m.from_address
 
-    def share_my_address(self, data):
-        # TODO check if my address exists and is non empty
-        my_address = data.me['address']
-        m = Message()
-        s = m.jsonify()
+    def share_my_address(self, context, data):
+        while True:
+            # TODO check if my address exists and is non empty
+            my_address = data.me['address']
+            m = message.Message()
+            m.from_address = my_address
+            m.message = "message in a bottle"
 
-        for key in data.peers:
-            peer_addr = data.peers[key]['address']
-            SocketClient.send(peer_addr[0], peer_addr[0], s)
+            for key in self.data.peers:
+                peer_addr = self.data.peers[key]['address']
+                m.to_address = peer_addr
+                s = message.compose(m)
+                SocketClient.send(peer_addr[0], peer_addr[1], s)
+
+            time.sleep(3)
+
+if __name__ == "__main__":
+
+    p = PeerNode()
+
+    import sys
+    time.sleep(1)
+    input("Press Enter to continue...")
+    sys.exit()

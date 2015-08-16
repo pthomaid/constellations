@@ -1,26 +1,61 @@
 import unittest
 
 import json
+import time
 
+from constellations import node
+from constellations import message
 from constellations import peer_node
 
 
 class TestPeerNode(unittest.TestCase):
 
     def testMessageJson(self):
-        m = peer_node.Message()
-
         d = {}
         d["from"] = ["localhost", 50000]
         d["to"] = ["localhost", 50001]
         d["message"] = "lorem ipsum"
         s = json.dumps(d)
 
-        m.parse(s)
+        m = message.parse(s)
 
         self.assertEqual(m.from_address, ["localhost", 50000])
         self.assertEqual(m.to_address, ["localhost", 50001])
         self.assertEqual(m.message, "lorem ipsum")
 
-if __name__ == '__main__':
-    unittest.main()
+        s_composed = message.compose(m)
+        self.assertEqual(s, s_composed)
+
+    # TODO Cleanup the server and ports properly in order to run multiple independent tests
+    # SetUp, TearDown?
+    """
+    def testNode(self):
+        p = node.Node()
+        p.stop()
+
+    def testNode2(self):
+        p = node.Node()
+        p.stop()
+
+    def testPeerNode(self):
+        address = ["localhost", 5000]
+        p = peer_node.PeerNode(host=address[0], port=address[1])
+        self.assertEqual(p.data.me["address"], address)
+        p.stop()
+    """
+
+    def testTwoPeerNodes(self):
+        address1 = ["localhost", 5000]
+        address2 = ["localhost", 5001]
+        p1 = peer_node.PeerNode(host=address1[0], port=address1[1])
+        p2 = peer_node.PeerNode(host=address2[0], port=address2[1])
+
+        p2.data.peers["1"] = {}
+        p2.data.peers["1"]["address"] = address1
+
+        time.sleep(20)
+
+        p1.stop()
+        p2.stop()
+
+        # TODO assert that no exceptions were raised during running this test
