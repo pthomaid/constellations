@@ -21,13 +21,23 @@ class PeerNode(Node):
         self.add_act(self.share_my_address)
 
     def parse_address(self, s):
-        print("Peer node received " + s)
         m = message.parse(s)
         # TODO check if an addresses is already known
         self.data.me['address'] = m.to_address
-        new_id = str(randint(1000, 9999))
-        self.data.peers[new_id] = {}
-        self.data.peers[new_id]['address'] = m.from_address
+        pid = self.peer_exists(m.from_address)
+        if pid:
+            self.data.peers[pid]["message"] = m.message
+        else:
+            new_id = str(randint(1000, 9999))
+            self.data.peers[new_id] = {}
+            self.data.peers[new_id]['address'] = m.from_address
+            self.data.peers[new_id]["message"] = m.message
+
+    def peer_exists(self, address):
+        for key in self.data.peers:
+            if self.data.peers[key]["address"] == address:
+                return key
+        return False
 
     def share_my_address(self, context, data):
         while True:
@@ -43,7 +53,8 @@ class PeerNode(Node):
                 s = message.compose(m)
                 SocketClient.send(peer_addr[0], peer_addr[1], s)
 
-            time.sleep(3)
+            time.sleep(randint(1,4))
+            
 
 if __name__ == "__main__":
 

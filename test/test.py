@@ -44,6 +44,7 @@ class TestPeerNode(unittest.TestCase):
         p.stop()
     """
 
+    """
     def testTwoPeerNodes(self):
         address1 = ["localhost", 5000]
         address2 = ["localhost", 5001]
@@ -57,5 +58,33 @@ class TestPeerNode(unittest.TestCase):
 
         p1.stop()
         p2.stop()
+
+        # TODO assert that no exceptions were raised during running this test
+    """
+
+    def testNPeerNodes(self):
+        N = 3
+        pnodes = []
+        addresses = []
+        for i in range(5000, 5000+N):
+            address = ["localhost", i]
+            addresses.append(address)
+            pnodes.append(peer_node.PeerNode(host=address[0], port=address[1]))
+
+        pnodes[1].data.peers["1"] = {}
+        pnodes[1].data.peers["1"]["address"] = addresses[0]
+
+        pnodes[2].data.peers["1"] = {}
+        pnodes[2].data.peers["1"]["address"] = addresses[0]
+
+        for i in range(0, 10):
+            for pn in pnodes:
+                print(str(pn.data.me) + "\n" + str(pn.data.peers))
+                print("----")
+            print("--------------")
+            time.sleep(2)
+
+        for pn in pnodes:
+            pn.stop()
 
         # TODO assert that no exceptions were raised during running this test
