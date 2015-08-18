@@ -1,9 +1,11 @@
 from setuptools import setup
 
+# Note: setuptools are not part of the python installation, 
+# need to install separately, using pip for example, befor running this setup
 
 def readme():
     with open('README.txt') as f:
-        return f.read()
+        return f.read()	
 
 setup(
     name='constellations',
