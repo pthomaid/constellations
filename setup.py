@@ -29,5 +29,5 @@ setup(
             'Topic :: Software Development :: Libraries :: Python Modules',
             'Topic :: System :: Distributed Computing',
         ],
-    test_suite="test"
+    test_suite="tests"
 )
