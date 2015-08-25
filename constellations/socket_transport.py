@@ -25,26 +25,34 @@ class SocketTransport():
     def receive(self, callback):
         self.server_callback = callback
         self.server_thread = Thread(target=self.server_listen, daemon=True)
+        self.server_thread.start()
 
     def server_listen(self):
         # Sets ut the socket to listen for incoming connections
         self.s.listen(1)
         try:
             while self.running:    # Always serve
-                conn, addr = self.s.accept()
-                data = conn.recv(1024)
-                # Convert the input message to a string and pass it to the message handler
-                self.server_callback(data.decode('UTF-8'))
-                # Send reply, is it neccessary?
-                conn.sendall(bytes("ack", 'UTF-8'))
-                conn.close()
+                try:
+                    print("listening socket " + str(self.s))
+                    conn, addr = self.s.accept()
+                    data = conn.recv(1024)
+                    # Convert the input message to a string and pass it to the message handler
+                    self.server_callback(data.decode('UTF-8'))
+                    # Send reply, is it neccessary?
+                    conn.sendall(bytes("ack", 'UTF-8'))
+                    conn.close()
+                except (socket.timeout):
+                    pass
+                except (socket.error):
+                    break
         finally:
             self.close()
 
     def server_bind(self):
         succesful_bind = False
         temp_port = self.port
-        try_counter = 10
+        times = 10
+        try_counter = times
         while not succesful_bind:
             try:
                 # Binds the socket to the address specified, the format of the address depends on address family
@@ -56,8 +64,7 @@ class SocketTransport():
                 succesful_bind = False
             try_counter -= 1
             if(try_counter == 0):
-                print("The server could not be bound")
-                # TODO: Throw an error here and close
+                raise socket.error("The socket server could not be bound after " + str(tries) + "times")
             temp_port = randint(5000, 6000)
         self.port = temp_port
 
@@ -65,12 +72,12 @@ class SocketTransport():
         SocketClient.send(address['host'], address['port'], message)
 
     def close(self):
+        self.running = False
         # TODO read about setsockopt and options
         # TODO find a way to programmatically stop reading and close the socket
-        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        #self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         # Close the socket
         self.s.close()
-        self.running = False
 
 class SocketServer(Thread):
     """A threaded server that forwards the incoming messages to a supplied callback"""
