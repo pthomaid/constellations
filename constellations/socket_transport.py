@@ -1,7 +1,76 @@
 
 import socket   # The socket module is a wrapper around native BSD sockets
 from threading import Thread
+from random import randint
 
+
+class SocketTransport():
+
+    def __init__(self, address):
+        self.running = True
+
+        # The socket() function returns a socket object whose methods implement the various socket system calls
+        # Using default arguments, see the socket module documentation for options
+        self.s = socket.socket()
+        
+        # Socket operations will raise a timeout exception if the timeout period value has elapsed before the operation has completed
+        self.s.settimeout(3)    # seconds
+        
+        self.host = address['host']      # '' means all available interfaces
+        self.port = address['port']
+
+        # Attempts to bind the server, preferably on the specified address
+        self.server_bind()
+
+    def receive(self, callback):
+        self.server_callback = callback
+        self.server_thread = Thread(target=self.server_listen, daemon=True)
+
+    def server_listen(self):
+        # Sets ut the socket to listen for incoming connections
+        self.s.listen(1)
+        try:
+            while self.running:    # Always serve
+                conn, addr = self.s.accept()
+                data = conn.recv(1024)
+                # Convert the input message to a string and pass it to the message handler
+                self.server_callback(data.decode('UTF-8'))
+                # Send reply, is it neccessary?
+                conn.sendall(bytes("ack", 'UTF-8'))
+                conn.close()
+        finally:
+            self.close()
+
+    def server_bind(self):
+        succesful_bind = False
+        temp_port = self.port
+        try_counter = 10
+        while not succesful_bind:
+            try:
+                # Binds the socket to the address specified, the format of the address depends on address family
+                self.s.bind((self.host, temp_port))
+                succesful_bind = True
+                break
+            except (socket.error):
+                print("The port was taken, trying another")
+                succesful_bind = False
+            try_counter -= 1
+            if(try_counter == 0):
+                print("The server could not be bound")
+                # TODO: Throw an error here and close
+            temp_port = randint(5000, 6000)
+        self.port = temp_port
+
+    def send(self, address, message):
+        SocketClient.send(address['host'], address['port'], message)
+
+    def close(self):
+        # TODO read about setsockopt and options
+        # TODO find a way to programmatically stop reading and close the socket
+        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # Close the socket
+        self.s.close()
+        self.running = False
 
 class SocketServer(Thread):
     """A threaded server that forwards the incoming messages to a supplied callback"""
@@ -53,7 +122,6 @@ class SocketServer(Thread):
 class SocketClient:
     """Sends string messages via a socket address"""
 
-    @staticmethod
     def send(host, port, message):
         response = ""
         try:
