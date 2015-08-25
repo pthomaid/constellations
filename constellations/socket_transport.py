@@ -64,7 +64,7 @@ class SocketTransport():
                 succesful_bind = False
             try_counter -= 1
             if(try_counter == 0):
-                raise socket.error("The socket server could not be bound after " + str(tries) + "times")
+                raise socket.error("The socket server could not be bound after " + str(times) + "times")
             temp_port = randint(5000, 6000)
         self.port = temp_port
 
