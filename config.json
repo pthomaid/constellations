@@ -1,0 +1,6 @@
+{
+
+"bind_port_range": [5000, 6000],
+"known_hosts": ["localhost"]
+
+}

@@ -3,10 +3,11 @@ import socket   # The socket module is a wrapper around native BSD sockets
 from threading import Thread
 from random import randint
 
+from . import config
 
 class SocketTransport():
 
-    def __init__(self, address):
+    def __init__(self):
         self.running = True
 
         # The socket() function returns a socket object whose methods implement the various socket system calls
@@ -16,8 +17,8 @@ class SocketTransport():
         # Socket operations will raise a timeout exception if the timeout period value has elapsed before the operation has completed
         self.s.settimeout(3)    # seconds
         
-        self.host = address['host']      # '' means all available interfaces
-        self.port = address['port']
+        self.host = ''         # '' means all available interfaces
+        self.port = -1         # will be set in the bind function
 
         # Attempts to bind the server, preferably on the specified address
         self.server_bind()
@@ -33,7 +34,7 @@ class SocketTransport():
         try:
             while self.running:    # Always serve
                 try:
-                    print("listening socket " + str(self.s))
+                    #print("listening socket " + str(self.s))
                     conn, addr = self.s.accept()
                     data = conn.recv(1024)
                     # Convert the input message to a string and pass it to the message handler
@@ -49,8 +50,9 @@ class SocketTransport():
             self.close()
 
     def server_bind(self):
+        c = config.get()
         succesful_bind = False
-        temp_port = self.port
+        temp_port = c['bind_port_range'][0]
         times = 10
         try_counter = times
         while not succesful_bind:
@@ -65,7 +67,7 @@ class SocketTransport():
             try_counter -= 1
             if(try_counter == 0):
                 raise socket.error("The socket server could not be bound after " + str(times) + "times")
-            temp_port = randint(5000, 6000)
+            temp_port = randint(c['bind_port_range'][0], c['bind_port_range'][1])
         self.port = temp_port
 
     def send(self, address, message):

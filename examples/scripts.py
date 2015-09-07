@@ -2,59 +2,47 @@
 import sys
 import time
 
-from constellations.peer_node import PeerNode
+#from constellations.peer_node import PeerNode
 from constellations.node import Node
-from constellations.basics.socketClientServer import SocketServer
-from constellations.basics.socketClientServer import SocketClient
+from constellations.socket_transport import SocketTransport
 
-# Using the socket client and server
-"""
+
+# Socket Client and Server
+
 # The function to be supplied as callback to the socket server
-def callbackfunction(message):
-    print("handle: " + message)
+def handler(message):
+    print("handling: " + message)
 
-server = SocketServer(50000, callbackfunction)
-server.start()
+servers = []
+for i in range(0, 3):
+    servers.append(SocketTransport())
+    servers[i].receive(handler)
 
-SocketClient.send("localhost", 50000, "rnadom srting")
+    print(servers[i].host)
+    print(servers[i].port)
+
+servers[0].send({"host":"localhost","port": servers[i].port}, "rnadom srting")
+
+
+# Nodes
+def nodehandler(message):
+    print("Node handling: " + message)
+
+ns = []
+
+for i in range(0, 10):
+    ns.append(Node())
+    ns[i].add_handler(nodehandler)
+    
+    print(ns[i].transport.host)
+    print(ns[i].transport.port)
+
+servers[0].send({"host":"localhost","port": ns[i].transport.port}, "rnadom srting")
+
 """
-
-# Using the node
-"""
-def myhandler1(message):
-    print("My handler1 received: " + message)
-
-def myhandler2(message):
-    print("My handler2 received: " + message)
-
-n = Node()
-n.add_handler(myhandler1)
-n.add_handler(myhandler2)
-n.start()
-
-SocketClient.send("localhost", 50000, "lodpsdppsdpsdf")
-time.sleep(2)
-SocketClient.send("localhost", 50000, "second message")
-"""
-
-def myhandler(message):
-    print("My handler1 received: " + message)
-
-n1 = Node(50002)
-n2 = Node(50003)
-n1.add_handler(myhandler)
-n2.add_handler(myhandler)
-n1.start()
-n2.start()
-
 pn1 = PeerNode(n1)
 pn2 = PeerNode(n2)
-
-
-
-#SocketClient.send("localhost", 50000, "lodpsdppsdpsdf")
-#time.sleep(2)
-#SocketClient.send("localhost", 50001, "second message")
+"""
 
 time.sleep(1)
 input("Press Enter to continue...")

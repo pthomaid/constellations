@@ -5,8 +5,8 @@ from queue import Queue
 from threading import Thread
 from random import randint
 
-from .socket_client_server import SocketServer
-from .socket_client_server import SocketClient
+from . import config
+from constellations.socket_transport import SocketTransport
 
 
 class Data:
@@ -19,20 +19,19 @@ class Data:
 class Node:
     """ A Node combines an input server with a queue and a list of handlers """
 
-    def __init__(self, host='', port=50000):
+    def __init__(self):
         # TODO pick another port if the first one is already bound
         # TODO add the handler and acts lists implementations (think about the semantics and abstractions)
         # TODO make Node be a thread or use its own thread
-
-        self.data = Data()
-        self.data.me['address'] = [host, port]
 
         # A queue to place incoming messages, decouples the server from the handling
         self.message_queue = Queue()
 
         # Add the put method of the message_queue as callback to the server
-        self.server = SocketServer(self.message_queue.put, host, port)
-
+        self.transport = SocketTransport()
+        self.data = Data()
+        self.data.me['address'] = [self.transport.host, self.transport.port]
+        
         # Handlers handle the incoming messages
         self.handlers = []
 
@@ -43,7 +42,8 @@ class Node:
 
         t = Thread(target=self.queue_consumer, daemon=True)
         t.start()
-        self.server.start()
+        
+        self.transport.receive(self.message_queue.put)
 
     def add_handler(self, func):
         # TODO check if func supports the message argument (is this possible?)
