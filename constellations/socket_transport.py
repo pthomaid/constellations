@@ -73,6 +73,14 @@ class SocketTransport():
     def send(self, address, message):
         SocketClient.send(address['host'], address['port'], message)
 
+    def send_maybe(self, address, message):
+        ''' Like send() but silently catches all exceptions
+    '''
+        try:
+            SocketClient.send(address[0], int(address[1]), message)
+        except:
+            pass
+
     def close(self):
         self.running = False
         # TODO read about setsockopt and options
@@ -131,19 +139,24 @@ class SocketServer(Thread):
 class SocketClient:
     """Sends string messages via a socket address"""
 
-    def send(host, port, message):
-        response = ""
+    def send(host, port, message, throw_exception=True):
+        response = bytes("", "UTF-8")
         try:
             # Create the socket object
             s = socket.socket()
 
-            s.connect((host, port))
-
-            # Convert the message to bytes and send
-            s.sendall(bytes(message, 'UTF-8'))
-
-            # Receive the response
-            response = s.recv(1024)
+            if throw_exception:
+                s.connect((host, port))
+                # Convert the message to bytes and send
+                s.sendall(bytes(message, 'UTF-8'))
+                # Receive the response
+                response = s.recv(1024)
+            else:
+                result = s.connect_ex((host, port))
+                if result == 0:
+                    s.sendall(bytes(message, 'UTF-8'))
+                    response = s.recv(1024)
+            
         except TypeError:
             print("TypeError while sending: " + message)
         finally:

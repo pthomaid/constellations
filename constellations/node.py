@@ -30,8 +30,11 @@ class Node:
         # Add the put method of the message_queue as callback to the server
         self.transport = SocketTransport()
         self.data = Data()
-        self.data.me['address'] = [self.transport.host, self.transport.port]
-        
+        if(self.transport.host == ""):
+            self.data.me['address'] = ["localhost", self.transport.port]
+        else:
+            self.data.me['address'] = [self.transport.host, self.transport.port]
+            
         # Handlers handle the incoming messages
         self.handlers = []
 
@@ -51,7 +54,7 @@ class Node:
 
     def add_act(self, func):
         # TODO check if func supports the data argument (is this possible?)
-        t = Thread(target=func, args=(self, self.data), daemon=True)
+        t = Thread(target=func, args=(self,), daemon=True)
         t.start()
         self.acts.append(t)
 
@@ -71,7 +74,7 @@ class Node:
             # Passes the next queue item to all the registered handlers (TODO should I clone the message?)
             if next_item is not None:
                 for h in self.handlers:
-                    h(next_item)
+                    h(self, next_item)
 
 
 if __name__ == "__main__":
