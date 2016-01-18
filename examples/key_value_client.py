@@ -27,7 +27,14 @@ class Key_value_client():
         self.gossip.new_gossip(json.dumps(qu))
         self.event.clear()
         try:
-            return self.answer_queue.get(timeout=10) # 10 seconds timeout
+            ans = self.answer_queue.get(timeout=10)  # 10 seconds timeout
+            key_found = ans[0]
+            value_found = ans[1]
+            while  key_found != key or key_found == None:
+                ans = self.answer_queue.get(timeout=10)
+                key_found = ans[0]
+                value_found = ans[1]
+            return value_found
         except:
             return None
  
@@ -41,7 +48,7 @@ class Key_value_client():
     def gossip_handler(self, gossip):
         gossip = json.loads(gossip)
         if gossip["action"] == "get" and  "key" in gossip and "value" in gossip:
-            self.answer_queue.put(gossip["value"])
+            self.answer_queue.put((gossip["key"], gossip["value"]))
 
 kvc1 = Key_value_client()
 kvc2 = Key_value_client()
