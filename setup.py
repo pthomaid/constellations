@@ -15,7 +15,7 @@ setup(
     url='https://github.com/pthomaid/constellations',
     packages=['constellations'],
     download_url = 'https://github.com/pthomaid/constellations',
-    keywords = ['distributed', 'sockets'],
+    keywords = ['distributed', 'gossip'],
     description='Distributed multi-agent framework',
     long_description=readme(),
     classifiers=[

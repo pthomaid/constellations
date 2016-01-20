@@ -1,4 +1,7 @@
-# constellations
+Constellations
+
 A study in networks, agents and other things using Python.
 
-Implementing a little idea that has been going around in my head for a while now, we'll see where it goes.
+Implements a key-value store over a gossip protocol.
+
+Still an exercise in refactoring :/
