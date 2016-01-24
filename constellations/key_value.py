@@ -7,7 +7,6 @@ import random
 from .node import Node
 from .socket_transport import SocketTransport
 from . import discovery
-from . import gossip
 
 class Gossip_key_value():
 

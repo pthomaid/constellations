@@ -7,7 +7,7 @@ from constellations import discovery
 from constellations.key_value import Gossip_key_value
 from constellations.key_value_client import Key_value_client
 from constellations.node import Node
-from constellations.gossip import Gossip_node
+from constellations.gossip_node import Gossip_node
 
 """Using the socketTransport
 """

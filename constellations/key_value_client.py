@@ -8,13 +8,13 @@ import queue
 from constellations.node import Node
 from constellations.socket_transport import SocketTransport
 from constellations import discovery
-from constellations import gossip
+from constellations.gossip_node import Gossip_node
 
 class Key_value_client():
 
     def __init__(self):
         self.node = Node()
-        self.gossip = gossip.Gossip_node(self.node)
+        self.gossip = Gossip_node(self.node)
         discovery.add_discovery(self.node)
         self.gossip.register_handler(self.gossip_handler)
         self.event = threading.Event()
