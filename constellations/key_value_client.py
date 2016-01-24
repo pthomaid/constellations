@@ -27,11 +27,11 @@ class Key_value_client():
         self.gossip.new_gossip(json.dumps(qu))
         self.event.clear()
         try:
-            ans = self.answer_queue.get(timeout=10)  # 10 seconds timeout
+            ans = self.answer_queue.get(timeout=15)  # 10 seconds timeout
             key_found = ans[0]
             value_found = ans[1]
             while  key_found != key or key_found == None:
-                ans = self.answer_queue.get(timeout=10)
+                ans = self.answer_queue.get(timeout=15)
                 key_found = ans[0]
                 value_found = ans[1]
             return value_found

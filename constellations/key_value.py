@@ -9,10 +9,9 @@ from .socket_transport import SocketTransport
 from . import discovery
 from . import gossip
 
-class Datastore():
+class Gossip_key_value():
 
-    def __init__(self, index, node, gossip):
-        self.node = node
+    def __init__(self, gossip):
         self.gossip = gossip
         self.gossip.register_handler(self.handler)
         self.store = {}
@@ -28,8 +27,11 @@ class Datastore():
             return self.store[key]
         else:
             return None
-     
+            
     def set(self, key, value):
+        self.store[key] = value
+        
+    def distributed_set(self, key, value):
         if random.random() < self.store_probability:
             self.store[key] = value
         
@@ -52,4 +54,4 @@ class Datastore():
                 self.gossip.new_gossip(json.dumps(response), hops=5)
         
         elif gossip["action"] == "set":
-            self.set(gossip["key"], gossip["value"])
+            self.distributed_set(gossip["key"], gossip["value"])
