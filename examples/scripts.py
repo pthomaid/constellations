@@ -42,6 +42,12 @@ for i in range(0, numberofnodes):
     print(n.transport.port)
     stores.append(Gossip_key_value(Gossip_node(n)))
 
+for _ in range(15):
+    for n in stores:
+        print(n.gossip.node.data.peers)
+        print("")
+    time.sleep(2)
+    
 # Set some random values
 stores[3].set("key1", "value1")
 stores[7].set("key2", "value2")
@@ -49,7 +55,7 @@ stores[7].set("key2", "value2")
 # Create a client
 client = Key_value_client()
 
-time.sleep(20)
+time.sleep(5)
 
 # Use the client to get the values
 value1 = client.distributed_get("key1")
