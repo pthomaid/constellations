@@ -14,7 +14,7 @@ class Data:
     def __init__(self):
         self.me = {}
         self.peers = {}
-
+        self.peer_set = []
 
 class Node:
     """ A Node combines an input server with a queue and a list of handlers """
@@ -30,10 +30,10 @@ class Node:
         # Add the put method of the message_queue as callback to the server
         self.transport = SocketTransport()
         self.data = Data()
-        if(self.transport.host == ""):
-            self.data.me['address'] = ["localhost", self.transport.port]
-        else:
-            self.data.me['address'] = [self.transport.host, self.transport.port]
+        #if(self.transport.host == ""):
+        #    self.data.me['address'] = ["localhost", self.transport.port]
+        #else:
+        self.data.me['address'] = [self.transport.host, self.transport.port]
             
         # Handlers handle the incoming messages
         self.handlers = []

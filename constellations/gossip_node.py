@@ -92,3 +92,8 @@ class Gossip_node():
                 self.new_gossip(text, hops)                                                         # Received a new gossip
             else:
                 self.gossip_list[index].hops = min(self.gossip_list[index].hops, hops)      # Update existing gossip hops
+
+def add_gossip(node):
+    g = Gossip()
+    node.add_handler(g.receive_gossip)
+    node.add_act(g.send_gossip)

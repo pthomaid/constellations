@@ -14,12 +14,12 @@ class TestDiscovery(unittest.TestCase):
         pass
     
     def test_discovery(self):
-        nodes = [node.Node() for _ in range(10)]
+        nodes = [node.Node() for _ in range(3)]
         for n in nodes:
             discovery.add_discovery(n)
         
         for _ in range(1000):
             for n in nodes:
-                print(n.data.peers)
-                print("")
+                print(len(n.data.peer_set))
+            print("")
             time.sleep(1)
