@@ -30,7 +30,7 @@ class Discovery():
         return list1
         
     def send_discovery(self, node):
-        while True:
+        for _ in range(2):
             message_dict = {}
             message_dict['type'] = 'discovery'
             #message_dict['from'] = node.data.me['address']
@@ -44,9 +44,8 @@ class Discovery():
                     self.lock.release()
                     SocketClient.send(host, int(port), message, False)
                 time.sleep(0.1)
-                #print("dadadadadadadadadadad")
-            time.sleep(100)
-
+            time.sleep(5)
+            
     def send_all_to_all(self, node):
         while True:
             message_dict = {}
