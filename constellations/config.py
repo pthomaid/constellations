@@ -15,7 +15,7 @@ def get():
     try:
         with open(path, 'r') as f:
             config = json.load(f)
-    except FileNotFoundError:
+    except (OSError, IOError):
         return defaults
     return config
 

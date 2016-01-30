@@ -43,7 +43,8 @@ class Node:
 
         self.running = True
 
-        t = Thread(target=self.queue_consumer, daemon=True)
+        t = Thread(target=self.queue_consumer)
+        t.daemon = True
         t.start()
         
         self.transport.receive(self.message_queue.put)
@@ -54,7 +55,8 @@ class Node:
 
     def add_act(self, func):
         # TODO check if func supports the data argument (is this possible?)
-        t = Thread(target=func, args=(self,), daemon=True)
+        t = Thread(target=func, args=(self,))
+        t.daemon = True
         t.start()
         self.acts.append(t)
 

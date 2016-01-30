@@ -25,7 +25,8 @@ class SocketTransport():
 
     def receive(self, callback):
         self.server_callback = callback
-        self.server_thread = Thread(target=self.server_listen, daemon=True)
+        self.server_thread = Thread(target=self.server_listen)
+        self.server_thread.daemon = True
         self.server_thread.start()
 
     def server_listen(self):
