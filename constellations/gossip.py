@@ -69,9 +69,9 @@ class Gossip():
             if gossip.hops <= 0:                                                                          # Remove expired gossips 
                 self.gossip_list.remove(gossip)
                 continue
-                
+
             peer_key = random.choice(list(peers.keys()))                         # Select a random peer
-            
+
             message = {}                                                                                         # Assemble message
             message["type"] = "gossip"
             message["value"] = gossip.text
