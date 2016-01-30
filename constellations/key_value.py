@@ -43,7 +43,6 @@ class Gossip_key_value():
             
     def handler(self, gossip):
         gossip = json.loads(gossip)
-        
         if gossip["action"] == "get":        
             if gossip["key"] in self.store and not "value" in gossip:
                 response = {}

@@ -9,7 +9,7 @@ from constellations.socket_transport import SocketClient
 
 max_gossip_hops = 60
 
-class Gossip():
+class Gossip_data():
     def __init__(self, text, hops=max_gossip_hops):
         self.text = text
         self.hops = hops
@@ -17,7 +17,7 @@ class Gossip():
     def __str__(self):
         return str(self.text) + " hops:" + str(self.hops)
         
-class Gossip_node():
+class Gossip():
     """Implementation of the gossip protocol (https://en.wikipedia.org/wiki/Gossip_protocol)
     using a Node as the communication layer
     
@@ -51,7 +51,7 @@ class Gossip_node():
             handler(gossip)
                     
     def new_gossip(self, text, hops=max_gossip_hops):
-        self.gossip_list.append(Gossip(text, hops))
+        self.gossip_list.append(Gossip_data(text, hops))
         #self.node.data.gossip_hops[gossip] = hops
         # TODO: Use a separate thread for this so that handlers don't block this thread
         self.notify(text)

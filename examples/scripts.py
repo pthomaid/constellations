@@ -7,7 +7,7 @@ from constellations import discovery
 from constellations.key_value import Gossip_key_value
 from constellations.key_value_client import Key_value_client
 from constellations.node import Node
-from constellations.gossip_node import Gossip_node
+from constellations.gossip_node import Gossip
 
 """Using the socketTransport
 """
@@ -33,24 +33,24 @@ servers[0].send({"host":"localhost","port": servers[i].port}, "rnadom srting")
 """
 
 # Create a few gossip key-value nodes
-numberofnodes = 10
+numberofnodes = 6
 stores = []
 for i in range(0, numberofnodes):
     n = Node()
     discovery.add_discovery(n)
     print(n.transport.host)
     print(n.transport.port)
-    stores.append(Gossip_key_value(Gossip_node(n)))
+    stores.append(Gossip_key_value(Gossip(n)))
 
 for _ in range(15):
-    for n in stores:
-        print(n.gossip.node.data.peers)
+    for s in stores:
+        print(s.gossip.node.data.peers)
         print("")
     time.sleep(2)
     
 # Set some random values
 stores[3].set("key1", "value1")
-stores[7].set("key2", "value2")
+stores[5].set("key2", "value2")
 
 # Create a client
 client = Key_value_client()

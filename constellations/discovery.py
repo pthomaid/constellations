@@ -3,6 +3,7 @@ import time
 import json
 from random import randint
 from threading import Lock
+from itertools import chain
 
 from . import config
 from .socket_transport import SocketClient
@@ -29,24 +30,41 @@ class Discovery():
                 list1.append(address)
         return list1
         
+    def update_node_peers(self, node, new_list):
+        for address in new_list:
+            if not address in node.data.peer_set:
+                node.data.peer_set.append(address)
+                pid = self.peer_exists(node.data.peers, address)
+                if not pid:
+                    new_id = str(randint(100000, 999999))
+                    node.data.peers[new_id] = {}
+                    node.data.peers[new_id]['address'] = address
+        
     def send_discovery(self, node):
-        for _ in range(2):
-            message_dict = {}
-            message_dict['type'] = 'discovery'
-            #message_dict['from'] = node.data.me['address']
-            for host in self.config["known_hosts"]:
-                for port in range(self.config['bind_port_range'][0], self.config['bind_port_range'][1]):
-                    peer_address = [host, port]
+        #for _ in range(2):
+        message_dict = {}
+        message_dict['type'] = 'discovery'
+        #message_dict['from'] = node.data.me['address']
+        for host in self.config["known_hosts"]:
+            start_port = randint(0, self.config['bind_port_range'][1]-self.config['bind_port_range'][0])
+            search_range = range(self.config['bind_port_range'][0], self.config['bind_port_range'][1]+1)
+            shifted_range = chain(search_range[-start_port:], search_range[:-start_port])
+            for port in shifted_range:
+                peer_address = [host, port]
+                self.lock.acquire()
+                message_dict['peers'] = self.peers
+                message_dict['to'] = peer_address
+                message = json.dumps(message_dict)
+                self.lock.release()
+                exception = node.transport.send_maybe(peer_address, message)
+                if exception == None:
                     self.lock.acquire()
-                    message_dict['peers'] = self.peers
-                    message_dict['to'] = peer_address
-                    message = json.dumps(message_dict)
+                    self.peers = self.merge_lists(self.peers, [peer_address])
                     self.lock.release()
-                    SocketClient.send(host, int(port), message, False)
-                time.sleep(0.1)
-            time.sleep(5)
+            time.sleep(0.1)
             
     def send_all_to_all(self, node):
+        # TODO: make gossip-like, alternatively use this rarely or whenever a new peer appears
         while True:
             message_dict = {}
             message_dict['type'] = 'discovery'
@@ -56,21 +74,19 @@ class Discovery():
                 message = json.dumps(message_dict)
                 SocketClient.send(peer[0], int(peer[1]), message, False)
                 time.sleep(0.1)
-            time.sleep(3)
+            time.sleep(1)
             
     def receive_discovery(self, node, message):
-        #print(message)
         message_dict = json.loads(message)
         if message_dict['type'] == 'discovery':
             self.my_addresses = self.merge_lists(self.my_addresses, [message_dict['to']])
             self.lock.acquire()
             self.peers = self.merge_lists(self.peers, message_dict['peers'])
             self.peers = self.merge_lists(self.peers, [message_dict['to']])
-            #self.send_all_to_all()
+            self.update_node_peers(node, message_dict['peers'])
+            self.update_node_peers(node, [message_dict['to']])
             self.lock.release()
-            #print('self.peers')
-            #print(self.peers)
-            node.data.peer_set = list(self.peers)
+            #node.data.peer_set = list(self.peers)
 
     '''
     response_dict = {}

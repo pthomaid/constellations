@@ -71,15 +71,17 @@ class SocketTransport():
         self.port = temp_port
 
     def send(self, address, message):
-        SocketClient.send(address['host'], address['port'], message)
+        SocketClient.send(address['host'], int(address['port']), message)
 
     def send_maybe(self, address, message):
         ''' Like send() but silently catches all exceptions
-    '''
+        '''
+        exception = None
         try:
             SocketClient.send(address[0], int(address[1]), message)
-        except:
-            pass
+        except Exception as e:
+            exception = e
+        return exception
 
     def close(self):
         self.running = False

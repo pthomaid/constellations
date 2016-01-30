@@ -8,13 +8,13 @@ import queue
 from constellations.node import Node
 from constellations.socket_transport import SocketTransport
 from constellations import discovery
-from constellations.gossip_node import Gossip_node
+from constellations.gossip_node import Gossip
 
 class Key_value_client():
 
     def __init__(self):
         self.node = Node()
-        self.gossip = Gossip_node(self.node)
+        self.gossip = Gossip(self.node)
         discovery.add_discovery(self.node)
         self.gossip.register_handler(self.gossip_handler)
         self.event = threading.Event()
@@ -27,7 +27,7 @@ class Key_value_client():
         self.gossip.new_gossip(json.dumps(qu))
         self.event.clear()
         try:
-            ans = self.answer_queue.get(timeout=15)  # 10 seconds timeout
+            ans = self.answer_queue.get(timeout=50)  # 10 seconds timeout
             key_found = ans[0]
             value_found = ans[1]
             while  key_found != key or key_found == None:
