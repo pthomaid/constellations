@@ -26,12 +26,13 @@ class Gossip():
     
     """
     
-    def __init__(self, node):
+    def __init__(self, node, fanout=3):
         self.node = node
         self.gossip_list = []   # list of gossips (see class Gossip above)
         self.node.add_handler(self.receive_gossip)
         self.node.add_act(self.send_gossip)    
         self.gossip_handlers = []
+        self.fanout = fanout
 
     def get_gossip_index(self, text):
         for i, gossip in enumerate(self.gossip_list):
@@ -70,17 +71,18 @@ class Gossip():
                 self.gossip_list.remove(gossip)
                 continue
 
-            peer_key = random.choice(list(peers.keys()))                         # Select a random peer
+            peer_keys = random.sample(list(peers.keys()), self.fanout)     # Select *fanout* random peers
 
-            message = {}                                                                                         # Assemble message
-            message["type"] = "gossip"
-            message["value"] = gossip.text
-            message["gossip_hops"] = gossip.hops
-            message = json.dumps(message)
+            for peer_key in peer_keys:
+                message = {}                                                                                         # Assemble message
+                message["type"] = "gossip"
+                message["value"] = gossip.text
+                message["gossip_hops"] = gossip.hops
+                message = json.dumps(message)
             
-            address = peers[peer_key]["address"]                                          # Send
-            self.node.transport.send_maybe((address[0], int(address[1])), message)
-            time.sleep(0.1)
+                address = peers[peer_key]["address"]                                          # Send
+                self.node.transport.send_maybe((address[0], int(address[1])), message)
+                time.sleep(0.1)
 
     def receive_gossip(self, node, message):
         message = json.loads(message)
