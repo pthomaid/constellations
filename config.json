@@ -1,7 +1,6 @@
 {
 
 "bind_port_range": [40000, 40020],
-"known_hosts": ["localhost"],
-"known_hosts2": ["192.168.178.15", "192.168.178.10"]
+"known_hosts": ["localhost"]
 
 }
