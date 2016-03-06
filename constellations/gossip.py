@@ -28,9 +28,9 @@ class Gossip():
     
     def __init__(self, node, fanout=3):
         self.node = node
-        self.gossip_list = []   # list of gossips (see class Gossip above)
+        self.gossip_list = []   # list of gossips (see class Gossip_data)
         self.node.add_handler(self.receive_gossip)
-        self.node.add_act(self.send_gossip)    
+        self.node.add_action(self.send_gossip)    
         self.gossip_handlers = []
         self.fanout = fanout
 
@@ -98,4 +98,4 @@ class Gossip():
 def add_gossip(node):
     g = Gossip()
     node.add_handler(g.receive_gossip)
-    node.add_act(g.send_gossip)
+    node.add_action(g.send_gossip)

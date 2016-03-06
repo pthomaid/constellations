@@ -53,7 +53,7 @@ class Node:
         # TODO check if func supports the message argument (is this possible?)
         self.handlers.append(func)
 
-    def add_act(self, func):
+    def add_action(self, func):
         # TODO check if func supports the data argument (is this possible?)
         t = Thread(target=func, args=(self,))
         t.daemon = True
@@ -87,7 +87,8 @@ if __name__ == "__main__":
     def myhandler2(message):
         print("My handler2 received: " + message)
 
-    def greetings_sender(context, data):
+    def send_greetings(node):
+        data = node.data
         i = 0
         while True:
             SocketClient.send("localhost", data.me['address'][1], "lodpsdppsdpsdf" + str(i))
@@ -97,7 +98,7 @@ if __name__ == "__main__":
     n = Node(port=5003)
     n.add_handler(myhandler1)
     n.add_handler(myhandler2)
-    n.add_act(greetings_sender)
+    n.add_action(send_greetings)
 
     import sys
     time.sleep(1)

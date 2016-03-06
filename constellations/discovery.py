@@ -88,52 +88,10 @@ class Discovery():
             self.lock.release()
             #node.data.peer_set = list(self.peers)
 
-    '''
-    response_dict = {}
-    response_dict['type'] = 'discovery_response'
-    response_dict['from'] = message_dict['to']
-    response_dict['to'] = message_dict['from']
-    response = json.dumps(response_dict)
-    SocketClient.send(response_dict['to'][0], int(response_dict['to'][1]), response, False)
-        
-    def receive_discovery_response(self, node, message):
-        message_dict = json.loads(message)
-        if message_dict['type'] == 'discovery_response':
-            self.lock.acquire()
-            pid = self.peer_exists(node.data.peers, message_dict['from'])
-            self.lock.release()
-            if not pid:
-                new_id = str(randint(100000, 999999))
-                node.data.peers[new_id] = {}
-                node.data.peers[new_id]['address'] = message_dict['from']
-  '''
-    '''
-    def share_my_address(node):
-        peers = node.data.peers
-        while True:
-            message_dict = {}
-            message_dict['type'] = "discovery"
-            message_dict['from'] = node.data.me['address']
-            
-            lock.acquire()
-            keys = list(peers.keys())
-            lock.release()
-            for key in keys:
-                peer_address = peers[key]["address"]
-                message_dict['to'] = peer_address
-                message = json.dumps(message_dict)
-                node.transport.send_maybe((peer_address[0], int(peer_address[1])), message)
-            time.sleep(randint(60,120))
-    '''
-
-def add_discovery(node, act=True, handler=True):
+def add_discovery(node):
     d = Discovery()
-    if handler:
-        node.add_handler(d.receive_discovery)
-        #node.add_handler(d.receive_discovery_response)
-    if act:
-        node.add_act(d.send_discovery)
-        #node.add_act(share_my_address)
-        node.add_act(d.send_all_to_all)
+    node.add_handler(d.receive_discovery)
+    node.add_action(d.send_discovery)
+    node.add_action(d.send_all_to_all)
 
     
