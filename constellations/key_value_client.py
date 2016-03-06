@@ -16,7 +16,7 @@ class Key_value_client():
         self.node = Node()
         self.gossip = Gossip(self.node)
         discovery.add_discovery(self.node)
-        time.sleep(3)   # Wait for the discovery to work its magic (speed this up)
+        time.sleep(10)   # Wait for the discovery to work its magic (speed this up)
         self.gossip.register_handler(self.gossip_handler)
         self.event = threading.Event()
         self.answer_queue = queue.Queue()
@@ -28,7 +28,7 @@ class Key_value_client():
         self.gossip.new_gossip(json.dumps(qu))
         self.event.clear()
         try:
-            ans = self.answer_queue.get(timeout=50)  # 10 seconds timeout
+            ans = self.answer_queue.get(timeout=10)  # 10 seconds timeout
             key_found = ans[0]
             value_found = ans[1]
             while  key_found != key or key_found == None:

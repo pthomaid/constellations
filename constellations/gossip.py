@@ -7,7 +7,7 @@ from random import randint
 from . import config
 from constellations.socket_transport import SocketClient
 
-max_gossip_hops = 60
+max_gossip_hops = 30
 
 class Gossip_data():
     def __init__(self, text, hops=max_gossip_hops):

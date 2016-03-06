@@ -4,7 +4,7 @@ from setuptools import setup
 # need to install separately, using pip for example, befor running this setup
 
 def readme():
-    with open('README.txt') as f:
+    with open('README.md') as f:
         return f.read()	
 
 setup(

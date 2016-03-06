@@ -15,4 +15,4 @@ Constellations is a work in progress, __tread carefully__.
 TODO
 
 ##Example
-Take a look at _examples/script.py_.
+Take a look in the __scripts__ folder.
